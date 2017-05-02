@@ -1,0 +1,17 @@
+#npm
+node_modules
+node_modules
+.npm
+
+#logs
+*.log
+
+#grunt
+.grunt
+
+#OSX
+ .DS_Store
+
+ #java
+ .class
+

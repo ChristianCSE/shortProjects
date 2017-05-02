@@ -1,0 +1,12 @@
+
+module.exports = function(firstName, lastName) {
+    this.fisrtName = firstName; 
+    this.lastName = lastName; 
+    this.fullName = function(){
+	return this.firstName + " " + this.lastName; 
+    }
+    
+    
+
+
+}

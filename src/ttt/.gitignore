@@ -1,0 +1,13 @@
+#OSX
+ .DS_Store
+
+#npm
+node_modules
+
+#New Relic
+dump.rdb
+
+#emacs
+\#*\#
+.\#*
+

@@ -1,0 +1,16 @@
+{
+  "name": "tweet-bot",
+  "version": "0.0.1",
+  "description": "A bot that gets 10 recent tweets from your feed",
+  "main": "index.js",
+  "scripts": {
+    "start": "node tweetbot.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "christiansanchez",
+  "license": "ISC",
+  "dependencies": {
+    "@slack/client": "^3.5.3",
+    "twit": "^2.2.4"
+  }
+}
