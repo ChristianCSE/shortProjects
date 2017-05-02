@@ -33,4 +33,4 @@
 
 :ghost: 
 
-![demo](https://github.com/ChristianCSE/Bots-Webhooks-Small-Projects/blob/master/src/ttt/Demo.gif)
+![demo](https://github.com/ChristianCSE/shortProjects/blob/master/src/ttt/Demo.gif)
