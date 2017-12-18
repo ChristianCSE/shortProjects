@@ -1,0 +1,4 @@
+prototype 
+1. Make a static site (everything hard coded)
+2. Determine state relationships (state vs prop: common owner component)
+3. Inverse Data Flow: function mutation logic 
