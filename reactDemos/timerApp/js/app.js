@@ -6,6 +6,8 @@ Finalizing Hierarchical Structure.
 1. Make a static app
 2. Determine statefulness & props
 3. Inverse data flow (function calls)
+
+COMMON COMPONENT OWNER, EVENT BUBBLING, INVERSE DATE-FLOW
  */
 
 //After investigating the entirity of the app 
@@ -120,6 +122,7 @@ class TimerDashboard extends React.Component {
   //COMPONENT EVENT BUBBLING where we send the event all the way up to the owner
   //Remember these methods cause re-rendering and everything below (in the hierarchy model)
   //will re-render as well
+  //NOTE: timers is an array
   render() {
     return (
       <div className='ui three column centered grid'> 
@@ -139,6 +142,283 @@ class TimerDashboard extends React.Component {
     );
   }
 }
+
+//this is the '+' sign 
+//placing this this high makes sense, since it immediately goes to the dashboard
+class ToggleableTimerForm extends React.Component {
+  state = {
+    isOpen : false
+  }
+
+  handleFormOpen = () => {
+    this.setState({ isOpen : true });
+  }
+
+  handleFormClose = () => {
+    this.setState({ isOpen : false });
+  }
+
+  handleFormSubmit = (timer) => {
+    this.props.onFormSubmit(timer);
+    this.setState({ isOpen : false });
+  }
+
+  render() {
+    if(this.state.isOpen){
+      return(
+        <TimerForm 
+          onFormSubmit={this.handleFormSubmit}
+          onFormClose={this.handleFormClose}
+        />
+      );
+    } else {
+      return(
+        <div className='ui basic content center aligned segment'>
+          <button 
+            className='ui basic button icon'
+            onClick={this.handleFormOpen}
+          >
+            <i className='plus icon' />
+          </button>
+        </div>
+      );
+    }
+  }
+
+}
+
+//At first, this seems to be our COMMON OWNER COMPONENT, since we see 
+//thatwe modify, delete, display timers; BUT ToggleableTimerForm creates them
+//which isn't contained by this. 
+class EditableTimerList extends React.Component {
+  render(){
+    //NOTE: this.props.timers is an array and we are traverse through it 
+    //and making multiple components based on the length of the timers array
+    //we can construct components by delivering prop
+    //NOTE: timers is an array of components!
+    const timers = this.props.timers.map( (timer)=> (
+      <EditableTimer 
+        key={timer.id}
+        id={timer.id}
+        title={timer.title}
+        project={timer.project}
+        elpased={timer.elpased}
+        runningSince={timer.runningSince}
+        onFormSubmit={timer.onFormSubmit}
+        onTrashClick={timer.onTrashClick}
+        onStartClick={timer.onStartClick}
+        onStopClick={timer.onStopClick}
+      />
+    ));
+    return (
+      <div id='timers'> 
+        {timers}
+      </div>
+    );
+  }
+}
+
+
+class EditableTimer extends React.Component {
+  //being open & closed belongs to this component
+  //it wouldn't make sense to make opening/closing of a single component 
+  //belong to the dashboard
+  state = {
+    editFormOpen : false
+  };
+  
+  handleEditClick = () => {
+    this.openForm();
+  }
+  
+  handleFormClose = () => {
+    this.closeForm();
+  }
+
+  handleSubmit = (timer) => {
+    this.props.onFormSubmit(timer);
+    this.closeForm();
+  }
+
+  closeForm = () => {
+    this.setState({ editFormOpen : false });
+  }
+
+  openForm = () => {
+    this.setState({ editFormOpen : true });
+  }
+
+  render(){
+    if(this.state.editFormOpen){
+      return(
+        <TimerForm 
+          id={this.props.id}
+          title={this.props.title}
+          project={this.props.project}
+          onFormSubmit={this.handleSubmit}
+          onFormClose={this.handleFormClose}
+        />
+      );
+    } else{
+      return(
+        <Timer 
+          id={this.props.id}
+          title={this.props.title}
+          project={this.props.project}
+          elapsed={this.props.elapsed}
+          runningSince={this.props.runningSince}
+          onEditClick={this.handleEditClick}
+          onTrashClick={this.props.onTrashClick}
+          onStartClick={this.props.onStartClick}
+          onStopClick={this.props.onStopClick}
+        />
+      );
+    }
+  }
+}
+
+
+class TimerForm extends React.Component {
+  state = {
+    title : this.props.title || '', 
+    project: this.props.project || ''
+  }
+
+  handleTitleChange = (e) => {
+    this.setState({ title: e.target.value });
+  }
+
+  handleProjectChange = (e) => {
+    this.setState({ project: e.target.value });
+  }
+
+  handleSubmit = () => {
+    this.props.onFormSubmit({
+      id: this.props.id,
+      title: this.props.title,
+      project: this.props.project
+    });
+  }
+
+  //NOTE: Title of our task is considered the state of TimerForm!
+  //even though it was first declared in TimerDashboard
+  render(){
+    const submitText = this.props.id ? 'Update' : 'Create';
+    return(
+      <div className='ui centered card'>
+        <div className='content'>
+          <div className='ui form'>
+
+            <div className='field'>
+              <label>Title</label>
+              <input 
+                type='text'
+                value={this.state.title}
+                onChange={this.handleTitleChange}
+              />
+            </div>
+
+            <div className='field'>
+              <label>Project</label>
+              <input 
+                type='text'
+                value={this.state.project}
+                onChange={this.handleProjectChange}
+              />
+            </div>
+
+            <div className='ui two bottom attached buttons'>
+              <button 
+                className='ui basic blue button' 
+                onClick={this.handleSubmit}
+              >
+              {submitText}
+              </button>
+              <button
+                className='ui basic red button'
+                onClick={this.props.onFormClose}
+              >
+                Cancel
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+class Timer extends React.Component {
+  
+  //built-in react method, invoked following render(); 
+  //it still follows the path of rendering in that any child would also be re-rendered
+  //forceUpdate() causes re-rendering!
+  componentDidMount(){
+    this.forceUpdateInterval = setInterval(()=>this.forceUpdate(), 50);
+  }
+
+  componentWillUnmount(){
+    clearInterval(this.forceUpdateInterval);
+  }
+  
+  //I'm not entirely sure why the handler functions (which don't even handle the event)
+  //are placed here and not in TimerActionButton
+  //Plus all the method is doing is propagating it upwards up until the dashboard
+  
+  handleStartClick = () => {
+    this.props.onStopClick(this.props.id);
+  }
+
+  handleStopClick = () => {
+    this.props.onStopClick(this.props.id);
+  }
+
+  handleTrashClick = () => {
+    this.props.onTrashClick(this.props.id);
+  }
+
+  render(){
+    const elapsedString = helpers.renderElapsedString(
+      this.props.elapsed, this.props.runningSince
+    );
+    return(
+      <div className='ui centered card'>
+        <div className='content'>
+          <div className='header'>
+            {this.props.title}
+          </div>
+
+          <div className='meta'>
+            {this.props.project}
+          </div>
+
+          <div className='center aligned description'>
+            <h2>{elapsedString}</h2>
+          </div>
+
+          <div className='extra content'>
+            <span 
+              className='right floated trash icon'
+              onClick={this.handleTrashClick}
+            > 
+              <i className='trash icon' />
+            </span>
+          </div>
+        </div>
+
+        <TimerActionButton 
+          timerIsRunning={!!this.props.runningSince}
+          onStartClick={this.handleStartClick}
+          onStopClick={this.handleStopClick}
+        />
+
+      </div>
+    );
+  }
+  
+}
+
 
 ReactDOM.render(
   <TimerDashboard />. 
