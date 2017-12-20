@@ -412,11 +412,35 @@ class Timer extends React.Component {
           onStartClick={this.handleStartClick}
           onStopClick={this.handleStopClick}
         />
-
       </div>
     );
   }
-  
+}
+
+//NOTE: that we don't even have a handler function here 
+//we do propogate the event to prop (a parent method)
+class TimerActionButton extends React.Component {
+  render(){
+    if(this.props.timerIsRunning){
+      return (
+        <div 
+          className='ui bottom attached red basic button'
+          onClick={this.props.onStopClick}
+        >
+          Stop 
+        </div>
+      );
+    } else{
+      return (
+        <div 
+          className='ui bottom attatched green basic button'
+          onClick={this.props.onStartClick}
+        >
+          Start
+        </div>
+      );
+    }
+  }
 }
 
 
