@@ -824,8 +824,11 @@ Whenever a state transition depends on the current state,
 using a function to set the state helps avoid the change
 for enigmatic bugs to materialize. 
 
-*setState(): 
-
+`setState():`
+Note that setState's full function signature is 
+```reactjs
+setState(updater, [,callback])
+```
 
 
 
