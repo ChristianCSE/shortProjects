@@ -961,11 +961,121 @@ which that function was declared.
 --------------------------------------------
 --------------------------------------------
 
+## Stateless Components (FUNCTION STATELESS PURE COMPONENT)
+
+Purpose: lightweight components that don't require special handeling. 
+Def: Component that only need the render() method. 
+
+`Stateless Functional Component Syntax: `
+
+```
+const Header = (props) => {
+  return (<h1>{props.headerText}</h1>);
+}
+```
+NOTE: 
+Props are passed into the function. 
+We are just using a normal Js function, nothing else. 
+This is a stateless functional component; hence, they don't have a 
+`this` property to even refer to -- a new React Component instance is never 
+created. 
+These are FUNCTIONS; hence, no backing instance -- they cannot contain state.
+`FUNCTION STATELESS PURE COMPONENT` are outside the normal component 
+lifecycle methods; hence, we annot use refs, ref the DOM, etc. 
+Still, React allows us to use propTypes & defaultProps on our `FUNCTION STATELESS PURE COMPONENT`.
+
+`Immediate Benefits:`
+```
+Minimize stateful components 
+Performance 
+```
+With the absence of needing to keep track of component instance in memory, 
+dirty checking, etc. => perf boost. 
+
+`If lifecycle methods aren't required and you can get away with only arendering function, USE Stateless Functional Pure Components!`
+
+
+Example of making a component Functionally Pure!
+
+Look at the Switch Component. 
+We cannot remove state completely; however, we can isolate it. 
+We are trying to pull the state into a few parent components. 
+=> we pulled each choice into `renderChoice` indicating a 
+good candidate for pulling into it's own stateless component. The 
+only problem: `renderChoice` calls `setState`.
+
+`Functionally Pure Component!`
+```
+//converting our renderChoice method into a functioncally pure component
+const Choice = function(props){
+  const cssClasses = [];
+  if(props.active) {
+    cssClasses.push(styles.active);
+  }  
+  return(
+    <div className="choice" onClick={props.onClick} className={cssClasses}>
+      {props.label}
+    </div>
+  )
+}
+```
+NOTE: this functionally pure component doesn't reference state (`this`). IOW, 
+we cannot read from state. 
+Now, pass arguments down through props. Notice that our functional component 
+accepts an argument that we've named props
+
+`onClick={props.onClick}`
+Notice we have a prop function, onClick is a function belonging to a 
+statefull component since this will be calling some stateful method like 
+setState()! 
+
+`How does our Switch component change?`
+```
+//NOTE: the properties we are sending get consildated into the object props.
+  return(
+    <div className="switch">
+      <Choice 
+        onClick={this.select(BTC)} 
+        active={this.state.payMethod === BTC}
+        label = "Pay with Bitcoin"
+        />
+      <Choice 
+        onClick={this.select(US)}
+        active={this.select.payMethod === US}
+        label = "Pay with USD"
+        />
+      Paying with: {this.state.payMethod}
+    </div>
+  );
+```
+
+
+Functionally Pure Components are reusable and not tied to any particular state!
+This Encourages reusing these types of components 
 
 
 
+This is the new structure of our Switch by decoupling renderChoice from 
+Swtich into it's own Functionally Pure Component. 
 
+```
 
+//functionally pure component
+/*NOTE: onClick={props.onClick}, this implies that the event handler belongs 
+to a parent/higher method than our current method. This makes sense since 
+our functionally pure component is stateless; hence, it won't be the one calling setState({}).*/
 
+const Choice = function(props){
+  const cssClasses = [];
+  if(props.active){
+    cssClassses.push(styles.active);
+  }
+  return(
+    <div className="choice" onClick={props.onClick} className={cssClasses}>
+      {props.label}
+    </div>
+  );
+}
 
+```
 

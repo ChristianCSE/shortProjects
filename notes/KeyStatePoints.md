@@ -65,3 +65,8 @@ const CounterWrapper = props => (
 ```
 Stateless: they don't have an internal state & 
 functional: they are written as a plain Js function
+
+
+In some of the projects, you'll see that there are CSS imports:
+` import from '../Switch.css' ` this is only due to using a webpack loader
+that allows us to import the CSS.
