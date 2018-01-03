@@ -877,69 +877,67 @@ This is what it ends up looking like:
 
 
 ```babel
-class DummyParent extends React.Component {
+class Header extends React.Component {
   state = {
-    dummyProp: 'something'
+    dummyProp: "something"
   }
   render(){
     return(
-      <div>
+      <div>  
         <Switch {...this.state} />
       </div>
     );
   }
-} 
-const BTC = 'Bitcoin';
-const US = 'USD';
+}
+
+
+const BTC = "Bitcoin";
+const US = "USD";
 
 class Switch extends React.Component {
   state = {
     currency: 'Bitcoin'
   }
+  //this.state. SHOULD NOT BE REFERRED!
 
   select = (selectedCurrency) => {
     return (evt) => {
-      this.setState((prevState, props) => {
-        //this actual changes state & re-renders the component 
-        return {state.currency: selectedCurrency};
-      }, ()=> {
-        console.log('callback to confirm changed state:', this.state)
-        }
-      )
+      this.setState((prevState, props) =>{
+        return {currency: selectedCurrency};
+      }, () => {
+        console.log('Callback to confirm state change: ', this.state);
+      });
     }
   }
-
-  currencyBtn = (choice) => {
-    return(
-      <button onClick={this.select(choice)}>
-        {choice===BTC ? 'BTC' : 'USD'}
-      </button>
-    );
-  }
-
+  
   renderChoice = (choice) => {
-    const cssClasses = [];
-    
+    const cssClasses = []; 
     if(this.state.payMethod === choice){
-      cssClasses.push(styles.active);
+      cssClasses.push(style.active);
     }
-
-    return (
-      <div className="choice" onClick={this.select(choice)} className={cssName}>
+    
+    return(
+      <div className="choice" 
+        onClick={this.select(choice)} 
+        className={cssClasses}>
         {choice}
-      </div>
+       </div>
     );
   }
-
+  
   render(){
     return(
       <div className="switch">
         {this.renderChoice(BTC)}
-        {this.renderChoice(US)}
-        Pay with: {this.state.currency}
+        {this.renderChoice(US)}        
+        Paying with: {this.state.currency}
       </div>
-    )
+    );
   }
+}
+
+
+ReactDOM.render(<Header />, document.getElementById('content'));
 
 }
 ```
@@ -960,6 +958,8 @@ which that function was declared.
 
 
 
+--------------------------------------------
+--------------------------------------------
 
 
 
