@@ -1068,7 +1068,8 @@ our functionally pure component is stateless; hence, it won't be the one calling
 const Choice = function(props){
   const cssClasses = [];
   if(props.active){
-    cssClassses.push(styles.active);
+    cssClassses.push(active); 
+    //<div class="active"> when css is .active or anything else
   }
   return(
     <div className="choice" onClick={props.onClick} className={cssClasses}>
@@ -1077,5 +1078,340 @@ const Choice = function(props){
   );
 }
 
+const BTC = "Bitcoin";
+const US = "USD";
+class Switch extends React.Component{
+  state = {
+    currency : "Bitcoin"
+  }
+
+  //this triggers re-rendering when state is updated/changed
+  select = (selectedCurrency) => {
+    //this is an anonymous function
+    return (event){
+      //NOTE: this.state is NOT referenced
+      this.setState((prevState, props) => {
+        return {currency: selectedCurrency};
+      }, () => {
+        //setState callback
+        console.log('setState Callback triggered after state change!', this.state);
+      });
+    }
+  }
+
+  render(){
+    /*NOTE: We call our Choice functionally pure component, which 
+    returns the a component: 
+    <div className="choice" onClick={props.onClick} className={cssClasses}>
+      {props.label}
+    </div>
+    This is in our Switch component after the initial rendering! 
+    */
+    return(
+      <div className="switch">
+        <Choice 
+          onClick={this.select(BTC)}>
+          active={this.state.currency === BTC}
+          label="Pay with Bitcoin" />
+        <Choice 
+          onClick={this.select(US)}
+          active={this.state.currency === US}
+          label="Pay with USD" />
+          Paying with: {this.state.currency}
+      </div>
+    );
+  }
+}
+
 ```
+
+
+
+
+//Reminder of a previous concept: 
+
+## PropTypes!
+
+//GOOD PRACTICE TO USE: PropTypes
+well-defined interfaces provide a layer of safety. 
+they are a form of documentation and providing defaultProps
+means the render of your code doesn't assume as much. 
+-> can omit certain type checks
+'prop-types' dependency => import PropTypes from 'prop-types'
+
+// if we declared our Component with class, we use this syntax:
+
+class Map extends React.Component {
+  static propTypes: {
+    zoom: PropTypes.number, 
+    place: PropTypes.object,
+    markers: PropTypes.array
+  };
+}
+//while there are built in PropTypes (which are validated)
+//we can define our own 
+
+
+
+
+
+
+## Appendix Explaination: PropTypes!
+1. What are they for?
+The are a way to validate values that are passed in through a component's
+props.
+Simultaneously, they provide a layer of documentation to the consumer 
+of our components. 
+They use to be a part of React, but now you have to manually install 
+the depenency via npm. 
+
+### Using PropTypes
+```
+import PropTypes from 'prop-types';
+
+class Component extends React.Component {
+  static propTypes = {
+    propProperty: PropTypes.string
+  }
+  render(){
+    return (<div>{this.props.name}</div>);
+  }
+}
+```
+NOTE: We set our propTypes with a static property on the class. 
+(there are other ways of declaring them depending when they are declared)
+
+There are predefined PropTypes (i.e. string, number, boolean, etc) and
+custom types.
+The more esoteric, but commonly used are: element, arrayOf, shape, 
+function, etc.
+
+
+NOTE: Unless we've explicitly stated that we require a prop, 
+
+
+## Static (Quick Review)
+
+Static methods are made directly on the class!
+They are NOT callable on instances of the class! 
+Static methods are usually used to create utility functions.
+If you want to call a static method within another static method, 
+you need to use `this` i.e.  `this.someStaticMethod()`
+Static methods aren't accessible with non-static methods!
+Even if you use `this`, they will work if you use 
+ClassName.staticMethodName().
+
+
+## Static: When to use?
+Follow the simple statement: 
+"Does it make sense ot call this method, even if no Object has been
+constructed yet?"
+If your response is yes to this response, then make the method static!
+i.e. Math.round(), Object.keys(), etc. 
+
+My own realization: these seem to be utility functions. 
+
+### Quick Example of static methods!
+
+```
+var textnode = document.createTextNode("Water");
+class Something {
+  static genericStaticMethod(someNumber=1){
+    textnode = document.createTextNode("Not Water");
+    console.log("Called with certain context: ", someNumber);
+    return someNumber*10;
+  }
+
+  genericNonStaticMethod(){
+    console.log("This should not be allowed to invoke a static method!");
+    //you can by-pass the fact 
+  }
+}
+```
+
+
+
+## PropTypes continued!
+=> A more esoteric type is `object shape`.
+This accepts an object with a list of key-valye pairs where it dictates
+name: type. 
+
+```
+class Component extends React.Component {
+  static propTypes = {
+    user : PropTypes.shape({
+      name: PropTypes.string, 
+      profile: PropTypes.string
+      });
+  }
+  render() {
+    const { user } = this.props
+    return (
+      <h1>{user.name} & {user.profile} </h1>
+    )
+  }
+}
+
+
+```
+
+
+## multiple VALUES 
+You also have the ability to allow more than one VALUE for a particular 
+prop! This is especially common with logs. 
+```
+static propTypes = {
+  levelValues : PropTypes.oneOf([
+    'debug', 'info', 'error'
+  ]),
+  phoneTypes : PropTypes.oneOfType([
+    PropTypes.number, 
+    PropTypes.string
+  ])
+}
+//versus
+```
+
+## multiple TYPES
+oneOf focuses on TYPES. iow, the prop being passed should be 
+one of those values and nothing else. oneOfType focuses on TYPES.
+
+
+
+## instanceOf
+Must be an instance of a Js class!
+```
+class Component extends React.Component {
+  static propTypes = {
+    user : PropTypes.instanceOf(User)
+  }
+}
+```
+
+
+## node 
+This is for a value that can be anything that can be rendered i.e.
+String, DOM elements, arrays, numbers, etc.
+Useful: Requiring a component to have children or setting a custom
+element. 
+
+
+## element 
+This allows the user to use custom components. IOW, 
+they aren't constrained to a certain component. 
+While some cases require a custom component, in our
+case of <List />, we want it to accept different
+list components. 
+
+```
+class Component extends React.Component {\
+  static propTypes = {
+    listComponent: PropTypes.element,
+    list: PropTypes.array
+  }
+  render(){
+
+  }
+}
+```
+
+## any type
+We just want the prop to be present regardless of it's
+type. 
+`PropTypes.any`.
+
+
+## ONLY APPEARS IN DEVELOPMENT!
+Remember, this propTypes will only show error logs in development
+builds. IOW, once you are deploying a production build you will 
+not see any notifications relating to propTypes!
+
+
+
+
+## Using mapping 
+NOTE: [].map returns another array while [].forEach just 
+does computations on the values and nothing is returned.
+With this in mind, when we want to construct components
+with props: 
+```
+class Basic extends React.Component {
+  render(){
+    return(
+      <div>
+      {/*React.Children.map(children, function[(thisArg)])*/}
+      {React.Children.map(this.props.children,this.renderChild)}
+      </div>
+    )
+  }
+}
+```
+NOTE: children is an array and renderChild is our function.
+All map does is for every element inside our prop we invoke 
+the provided function.
+
+# General Summary
+State, Props, Context (experimental feature, don't use unless it's
+unavoidable), PropTypes, Pure Stateless Functional Components. 
+Not really cleared up: lifecycle methods = componentDidMount & componentWillupdate
+
+
+
+
+## Forms 
+
+NOTE: You can use `onClick` & `onSubmit` to handle a submission on 
+your form. This seems to depend on the input your form accepts. These 
+functions are our even handlers. 
+
+
+
+
+## Generic Submission (onSubmit)
+
+
+```
+class Listings extends React.Componet {
+  state = { names: [] }
+
+  onFormSubmit = (evt) => {
+    //NOTE: The way we are accessing the input from our form!
+    const name = this.refs.name.value; 
+    //we use the spread operator to avoid [[name, nameB], newName]
+    const names = [...this.state.names, name];
+    this.setState({ names: names });
+    evt.preventDefualt();
+  }
+
+  render(){
+    return(){
+      <div>
+        <h1> Signing Sheet </h1>
+        <form onSubmit={this.onFormSubmit}>
+          <input placeholder="Name" ref="name" />
+          <input type="submit" />
+        </form>
+        <div>
+          <h3>Names</h3>
+          <ul>
+            {this.state.names.map((name,i)=><li key={i}>{name} </li>)}
+          </ul>
+        </div>
+      </div>
+    }
+  }
+}
+```
+
+
+NOTE: 
+this.refs.x.value: We access our form input.
+Form template: 
+```
+<form onSubmit={this.eventHandler}>
+  <input ref="namingVariableRef" />
+  <input type="submit" />
+</form>
+```
+
 
